@@ -648,14 +648,21 @@ function getInstagramData(query) {
  * @param {Object} data The JSON data retrieved from Instagram API.
  * @return {string[]} The URLs of downloadable media files.
  */
-function parseDownloadUrl(data) {
-  return (
-    // {"reels":{...},"reels_media":[...],"status":"ok"}
-    data.reels_media[0]?.items.map(
-      (item) => (item.video_versions || item.image_versions2.candidates)[0].url
-    ) || []
-  );
+function parseDownloadUrl(mediaItem) {
+  try {
+    if (mediaItem.video_versions && mediaItem.video_versions.length > 0) {
+      return mediaItem.video_versions[0].url;
+    }
+    if (mediaItem.image_versions2 && mediaItem.image_versions2.candidates && mediaItem.image_versions2.candidates.length > 0) {
+      return mediaItem.image_versions2.candidates[0].url;
+    }
+    return null;
+  } catch (error) {
+    console.warn("Se saltó un elemento incompatible de Instagram de forma segura: " + error.message);
+    return null;
+  }
 }
+
 
 /**
  * Test getting the URLs of media files in the data retrieved from Instagram's
