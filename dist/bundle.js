@@ -649,14 +649,66 @@ function getInstagramData(query) {
  * @param {Object} data The JSON data retrieved from Instagram API.
  * @return {string[]} The URLs of downloadable media files.
  */
+
 function parseDownloadUrl(data) {
-  return (
-    // {"reels":{...},"reels_media":[...],"status":"ok"}
-    data.reels_media[0]?.items.map(
-      (item) => (item.video_versions || item.image_versions2.candidates)[0].url
-    ) || []
+  if (!data || typeof data !== 'object') {
+    console.error('Instagram no devolvió un objeto JSON válido.');
+    return [];
+  }
+
+  console.log(
+    'Claves de la respuesta de Instagram: ' +
+    Object.keys(data).join(', ')
   );
+
+  // Formato esperado por la versión original.
+  const reelsMedia = data.reels_media;
+
+  if (!Array.isArray(reelsMedia)) {
+    console.warn(
+      'La respuesta no contiene el arreglo reels_media.'
+    );
+
+    console.warn(
+      'Resumen de respuesta: ' +
+      JSON.stringify({
+        status: data.status,
+        status_code: data.status_code,
+        message: data.message,
+        keys: Object.keys(data)
+      })
+    );
+
+    return [];
+  }
+
+  const urls = [];
+
+  reelsMedia.forEach((reel) => {
+    if (!Array.isArray(reel?.items)) {
+      return;
+    }
+
+    reel.items.forEach((item) => {
+      if (!item || typeof item !== 'object') {
+        return;
+      }
+
+      const url =
+        item.video_versions?.[0]?.url ??
+        item.image_versions2?.candidates?.[0]?.url;
+
+      if (typeof url === 'string' && url.length > 0) {
+        urls.push(url);
+      }
+    });
+  });
+
+  console.log('URLs de historias encontradas: ' + urls.length);
+
+  return urls;
 }
+
 
 /**
  * Test getting the URLs of media files in the data retrieved from Instagram's
