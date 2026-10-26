@@ -1059,4 +1059,11 @@ exports.try_get = try_get;
 exports.uploadToDrive = uploadToDrive;
 
 })(IGSF, this);
-function getInstance(){return IGSF};
+
+function getInstance() {
+  return IGSF;
+}
+
+IGStoriesToGDrive = {
+  getInstance: getInstance
+};
